@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\ProjectStatus;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[Fillable(['name', 'description', 'user_id', 'status'])]
 class Project extends Model
 {
     use SoftDeletes;
