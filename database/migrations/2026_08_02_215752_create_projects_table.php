@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->smallText('description')->nullable();
+            $table->mediumText('description')->nullable();
             $table->foreignId('user_id')->constrained('users');
             $table->string('status', 50)->default('Active');
             $table->softDeletes();
