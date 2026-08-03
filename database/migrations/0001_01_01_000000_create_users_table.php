@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name',100);
             $table->string('email',150)->unique();
-            $table->foreignId('user_type_id')->constrained('user_types');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
