@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->string('Title');
+            $table->string('title');
             $table->text('description')->nullable();
             $table->foreignId('project_id')->constrained('projects');
-            $table->string('Priority', 50)->default('Low');
+            $table->string('priority', 50)->default('Low');
             $table->string('status', 50)->default('Todo');
             $table->date('due_date')->nullable();
             $table->softDeletes();
