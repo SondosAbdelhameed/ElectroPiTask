@@ -8,6 +8,7 @@ use App\Http\Resources\SuccessResource;
 use App\Http\Resources\User\TaskResource;
 use App\Models\Task;
 use App\Models\Project;
+use App\Services\ProjectService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -17,16 +18,11 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(int $project, Request $request)
+    public function index(int $project, Request $request, ProjectService $projectService)
     {
-        $projectModel = Project::find($project);
-        if (!$projectModel) {
-            return new ErrorResource(Response::HTTP_NOT_FOUND, "Project not found.");
-        }
+        $projectModel = $projectService->authorizeProject($project);
 
-        Gate::authorize('view', $projectModel);
-
-        $tasks = Task::where('project_id', $project)->filter($request)->paginate();
+        $tasks = Task::where('project_id', $projectModel->id)->filter($request)->paginate();
         return TaskResource::collection($tasks);
     }
 
@@ -41,30 +37,20 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(TaskRequest $request, int $project)
+    public function store(TaskRequest $request, int $project, ProjectService $projectService)
     {
-        $projectModel = Project::find($project);
-        if (!$projectModel) {
-            return new ErrorResource(Response::HTTP_NOT_FOUND, "Project not found.");
-        }
+        $projectModel = $projectService->authorizeProject($project);
 
-        Gate::authorize('view', $projectModel);
-
-        $task = Task::create(array_merge($request->all(), ['project_id' => $project]));
+        $task = Task::create(array_merge($request->all(), ['project_id' => $projectModel->id]));
         return new SuccessResource(Response::HTTP_OK,"Task Created Successfully.");
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(int $project, int $task)
+    public function show(int $project, int $task, ProjectService $projectService)
     {
-        $projectModel = Project::find($project);
-        if (!$projectModel) {
-            return new ErrorResource(Response::HTTP_NOT_FOUND, "Project not found.");
-        }
-
-        Gate::authorize('view', $projectModel);
+        $projectModel = $projectService->authorizeProject($project);
 
         $taskModel = Task::find($task);
         if (!$taskModel) {
@@ -87,14 +73,9 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(TaskRequest $request, int $project, int $task)
+    public function update(TaskRequest $request, int $project, int $task, ProjectService $projectService)
     {
-        $projectModel = Project::find($project);
-        if (!$projectModel) {
-            return new ErrorResource(Response::HTTP_NOT_FOUND, "Project not found.");
-        }
-
-        Gate::authorize('update', $projectModel);
+        $projectModel = $projectService->authorizeProject($project, 'update');
 
         $taskModel = Task::find($task);
         if (!$taskModel) {
@@ -110,14 +91,9 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $project, int $task)
+    public function destroy(int $project, int $task, ProjectService $projectService)
     {
-        $projectModel = Project::find($project);
-        if (!$projectModel) {
-            return new ErrorResource(Response::HTTP_NOT_FOUND, "Project not found.");
-        }
-
-        Gate::authorize('delete', $projectModel);
+        $projectModel = $projectService->authorizeProject($project, 'delete');
 
         $taskModel = Task::find($task);
         if (!$taskModel) {
