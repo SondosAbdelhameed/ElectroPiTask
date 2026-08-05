@@ -7,6 +7,7 @@ use App\Http\Resources\ErrorResource;
 use App\Http\Resources\SuccessResource;
 use App\Http\Resources\User\ProjectResource;
 use App\Models\Project;
+use App\Services\ProjectService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
@@ -48,14 +49,9 @@ class ProjectController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, ProjectService $projectService)
     {
-        $project = Project::find($id);
-        if (!$project) {
-            return new ErrorResource(Response::HTTP_NOT_FOUND, "Project not found.");
-        }
-
-        Gate::authorize('view', $project);
+        $project = $projectService->authorizeProject($id);
 
         return new ProjectResource($project);
     }
@@ -71,14 +67,9 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProjectRequest $request, string $id)
+    public function update(ProjectRequest $request, string $id, ProjectService $projectService)
     {
-        
-        $project = Project::find($id);
-        if (!$project) {
-            return new ErrorResource(Response::HTTP_NOT_FOUND, "Project not found.");
-        }
-        Gate::authorize('update', $project);
+        $project = $projectService->authorizeProject($id, 'update');
 
         $project->update($request->validated());
         return new SuccessResource(Response::HTTP_OK,"Project Updated Successfully.");
@@ -87,15 +78,9 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id, ProjectService $projectService)
     {
-        $project = Project::find($id);
-
-        if (!$project) {
-            return new ErrorResource(Response::HTTP_NOT_FOUND, "Project not found.");
-        }
-        
-        Gate::authorize('delete', $project);
+        $project = $projectService->authorizeProject($id, 'delete');
 
         $project->delete();
         return new SuccessResource(Response::HTTP_OK,"Project deleted successfully");
